@@ -3,7 +3,7 @@ import pandas as pd
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
 
-df = pd.read_csv(r'Data/IMDB_Dataset.csv')
+df = pd.read_csv(r'IMDB_Dataset.csv')
 
 # Load the English tokenizer and language model
 activated = spacy.prefer_gpu()
