@@ -21,9 +21,9 @@ def clean_text(text):
     tokens2 = [token.text for token in tokens2 if token.text]
     return tokens2
 
-df['clean_review'] = df['review'].apply(clean_text)
-
+# df['clean_review'] = df['review'].apply(clean_text)
+clean_test = clean_text(test)
 
 # Print the tokens
-print(df['clean_review'].iloc[0])
-
+# print(df['clean_review'].iloc[0])
+print(clean_test)
