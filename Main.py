@@ -16,6 +16,7 @@ print(tokens)
 # Clean up data
 def clean_text(text):
     text = text.lower()
+    text = re.sub(r'<br\s*/?>', ' ', text)
     text = re.sub(r"[^a-zA-Z0-9]", " ", text)
     tokens2 = nlp(text)
     tokens2 = [token.text for token in tokens2 if token.text]
