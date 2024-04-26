@@ -22,9 +22,7 @@ def clean_text(text):
     # lowercase
     text = text.lower()
     # HTML tags
-    text = re.sub(r'<.*?>', '', text)
-    # Replace periods at the ends of sentences with a space
-    text = re.sub(r'\.\s*', ' ', text)
+    text = re.sub(r'<.*?>', ' ', text)
     # punctuations
     text = re.sub(r'[^\w\s]', '', text)
     # whitespaces
@@ -39,12 +37,13 @@ def tokenize(text):
 print(test)
 cleaned_text = clean_text(test)
 print(cleaned_text)
+print('\n')
 
 # clean and preprocess the text review data column in df
-#df['clean_text'] = df.iloc[:, 0].apply(clean_text)
+df['clean_text'] = df.iloc[:, 0].apply(clean_text)
 
 # tokenize the CLEANED text
-#df['tokens'] = df['clean_text'].apply(tokenize)
+df['tokens'] = df['clean_text'].apply(tokenize)
 
 # print for verification
-#print(df[['clean_text', 'tokens']].head())
+print(df[['clean_text', 'tokens']].head())
