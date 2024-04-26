@@ -1,11 +1,12 @@
 import spacy
 import spacy_cleaner
+from spacy_cleaner.processing import removers, replacers, mutators
 import pandas as pd
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
 
 # load dataset file
-df = pd.read_csv(r'Data/IMDB_Dataset MINIMIZED.csv')
+df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
 
 # Load the English tokenizer and language model
 activated = spacy.prefer_gpu()
@@ -28,22 +29,21 @@ def tokenize(text):
     doc = [token.lemma_ for token in doc if not token.is_stop]
     return doc
 
+pipeline = spacy_cleaner.Pipeline(
+    nlp,
+    removers.remove_stopword_token,
+    replacers.replace_punctuation_token,
+    mutators.mutate_lemma_token,
+)
 
-
-# df['clean_review'] = df['review'].apply(clean_text)
-#clean_test = clean_text(test)
-
-
-# Print the tokens
-# print(df['clean_review'].iloc[0])
-#print(clean_test)
+pipeline.clean(test)
 
 
 # clean and preprocess the text review data column in df
-df['clean_text'] = df.iloc[:, 0].apply(clean_text)
+#df['clean_text'] = df.iloc[:, 0].apply(clean_text)
 
 # tokenize the CLEANED text
-df['tokens'] = df['clean_text'].apply(tokenize)
+#df['tokens'] = df['clean_text'].apply(tokenize)
 
 # print for verification
-print(df[['clean_text', 'tokens']].head())
+#print(df[['clean_text', 'tokens']].head())
