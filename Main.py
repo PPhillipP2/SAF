@@ -1,9 +1,11 @@
 import spacy
+import spacy_cleaner
 import pandas as pd
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
 
-df = pd.read_csv(r'IMDB_Dataset.csv')
+# load dataset file
+df = pd.read_csv(r'Data/IMDB_Dataset MINIMIZED.csv')
 
 # Load the English tokenizer and language model
 activated = spacy.prefer_gpu()
@@ -18,17 +20,30 @@ print(tokens)
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'<br\s*/?>', ' ', text)
-    text = re.sub(r"[^a-zA-Z0-9]", " ", text)
-    tokens2 = nlp(text)
-    tokens2 = [(token.text, token.pos_) for token in tokens2 if token.text]
-    return tokens2
+    text = re.sub(r"[^a-zA-Z0-9]", ' ', text)
+    return text
+
+def tokenize(text):
+    doc = nlp(text)
+    doc = [token.lemma_ for token in doc if not token.is_stop]
+    return doc
 
 
 
 # df['clean_review'] = df['review'].apply(clean_text)
-clean_test = clean_text(test)
+#clean_test = clean_text(test)
 
 
 # Print the tokens
 # print(df['clean_review'].iloc[0])
-print(clean_test)
+#print(clean_test)
+
+
+# clean and preprocess the text review data column in df
+df['clean_text'] = df.iloc[:, 0].apply(clean_text)
+
+# tokenize the CLEANED text
+df['tokens'] = df['clean_text'].apply(tokenize)
+
+# print for verification
+print(df[['clean_text', 'tokens']].head())
