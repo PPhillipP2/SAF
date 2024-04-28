@@ -4,6 +4,8 @@ from spacy_cleaner.processing import removers, replacers, mutators
 import pandas as pd
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
+from spacy.pipeline import TextCategorizer
+from spacy.training import Example
 
 # load dataset file
 df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
@@ -47,3 +49,39 @@ pipeline.clean(test)
 
 # print for verification
 #print(df[['clean_text', 'tokens']].head())
+
+# Everything below is WIP
+
+textcat = nlp.create_pipe("textcat", config={"exclusive_classes": True})
+
+# Add labels
+textcat.add_label("amazing")
+textcat.add_label("good")
+textcat.add_label("okay")
+textcat.add_label("bad")
+textcat.add_label("terrible")
+
+# Train only textcat
+training_excluded_pipes = [
+    pipe for pipe in nlp.pipe_names if pipe != "textcat"
+]
+with nlp.disable_pipes(training_excluded_pipes):
+    optimizer = nlp.begin_training()
+    # Training loop
+    print("Beginning training")
+    batch_sizes = compounding(
+        4.0, 32.0, 1.001
+    )
+    for i in range(iterations):
+        loss = {}
+        random.shuffle(training_data)
+        batches = minibatch(training_data, size=batch_sizes)
+        for batch in batches:
+            text, labels = zip(*batch)
+            nlp.update(
+                text,
+                labels,
+                drop=0.2,
+                sgd=optimizer,
+                losses=loss
+            )
