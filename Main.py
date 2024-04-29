@@ -24,16 +24,22 @@ def clean_text(text):
     # remove html line breaks
     text = re.sub(r'<br\s*/?>', '', text)
     #remove non-alphanumeric characters
-    text = re.sub(r"[^a-zA-Z0-9]", ' ', text)
+    #text = re.sub(r"[^a-zA-Z0-9]", ' ', text)
     # Remove extra whitespaces
     text = re.sub(r'\s+', ' ', text).strip()
-    return text
+
+    # Lemmatization with SpaCy
+    cleaning_doc = nlp(text)
+    lemmatized_text = ' '.join([token.lemma_ for token in cleaning_doc])
+    return lemmatized_text
 
 
 
 # Function to analyze sentiment using SpaCyTextBlob
 def analyze_sentiment(text):
     doc = nlp(text)
+    # filter features/token properties here
+
     # Return the polarity score
     return doc._.blob.sentiment.polarity
 
@@ -73,7 +79,7 @@ def perform_sentiment_analysis(filepath):
 
     # Convert predictions list to DataFrame and save or display
     predictions_df = pd.DataFrame(all_predictions)
-    predictions_df.to_csv('movie_review_predictions.csv', index=True)
+    predictions_df.to_csv('movie_review_predictions.csv', index=False)
     print(predictions_df.head(15))  # Optionally print the first few rows
 
     # Print results
