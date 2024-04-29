@@ -40,7 +40,8 @@ def analyze_sentiment(text):
     doc = nlp(text)
     # filter features/token properties here
 
-    # Return the polarity score
+
+    # Return the sentiment
     return doc._.blob.sentiment.polarity
 
 
@@ -53,7 +54,7 @@ def load_data(filepath):
 
 def perform_sentiment_analysis(filepath):
     data = load_data(filepath)
-    kf = KFold(n_splits=5)  # 5-fold cross-validation
+    kf = KFold(n_splits=7)  # 5-fold cross-validation
     accuracies = []
     f1_scores = []
     all_predictions = []  # List to store all predictions
