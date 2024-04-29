@@ -1,16 +1,13 @@
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
-import spacy_cleaner
-from spacy_cleaner import processing, Cleaner
-from spacy_cleaner.processing import removers, replacers, mutators
 import pandas as pd
-from spacy.lang.en.stop_words import STOP_WORDS
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score, f1_score
+import numpy as np
 import re
-from spacy.pipeline import TextCategorizer
-from spacy.training import Example
 
 # load dataset file
-df = pd.read_csv(r'Data/IMDB Dataset.csv')
+df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
 
 pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
@@ -34,17 +31,64 @@ def clean_text(text):
     return text
 
 
-# Test for tokenization
-#test = "One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked."
 
+# Function to analyze sentiment using SpaCyTextBlob
+def analyze_sentiment(text):
+    doc = nlp(text)
+    # Return the polarity score
+    return doc._.blob.sentiment.polarity
+
+
+# Load data
+def load_data(filepath):
+    data = pd.read_csv(filepath)
+    data['review'] = data['review'].apply(clean_text)
+    return data
+
+
+def perform_sentiment_analysis(filepath):
+    data = load_data(filepath)
+    kf = KFold(n_splits=5)  # 5-fold cross-validation
+    accuracies = []
+    f1_scores = []
+
+    # Prepare data
+    sentiments = [analyze_sentiment(review) for review in data['review']]
+    data['predicted_sentiment'] = ['positive' if score > 0 else 'negative' for score in sentiments]
+    labels = data['sentiment'].apply(lambda x: 1 if x == 'positive' else 0).values
+    predicted_labels = data['predicted_sentiment'].apply(lambda x: 1 if x == 'positive' else 0).values
+
+    # Perform k-fold cross-validation
+    for train_index, test_index in kf.split(data):
+        y_test = labels[test_index]
+        predictions = predicted_labels[test_index]
+
+        # Calculate metrics
+        acc = accuracy_score(y_test, predictions)
+        f1 = f1_score(y_test, predictions)
+        accuracies.append(acc)
+        f1_scores.append(f1)
+
+    # Print results
+    print(f"Average Accuracy: {np.mean(accuracies):.2f}")
+    print(f"Average F1 Score: {np.mean(f1_scores):.2f}")
+
+# If this script is the main program being executed
+if __name__ == "__main__":
+    perform_sentiment_analysis('Data/IMDB Dataset MINIMIZED.csv')
+
+
+
+
+"""
 review_set = df.iloc[:, 0].tolist()
 
 # spacy default pipeline
 print("Default spacy tokens:")
 for review in review_set:
     print(review)
-    #doc = nlp(clean_text(review))
-    doc = nlp(review)
+    doc = nlp(clean_text(review))
+    #doc = nlp(review)
     # all desired properties from tokens picked here
     print([[token.text, token.pos_] for token in doc if not token.is_stop and not token.is_punct])
 
@@ -54,78 +98,4 @@ for review in review_set:
     print(doc._.blob.sentiment)
 
     print()
-
-
-"""
-pipeline = Cleaner(
-    nlp,
-    processing.remove_stopword_token,
-    processing.remove_punctuation_token,
-    processing.mutate_lemma_token,
-)
-
-
-test2 = ["One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked."]
-
-# custom spacy_cleaner pipeline
-processed = pipeline.clean(test2)
-print("Custom spacy_cleaner pipeline:")
-print(processed)
-
-
-
-
-# clean and preprocess the text review data column in df
-reviews = df.iloc[:, 0].tolist()
-
-df['clean_text'] = pipeline.clean(reviews)
-
-
-print("Movie Review Dataframe (custom pipeline:")
-print(df['clean_text'])
-
-
-# tokenize the CLEANED text
-#df['tokens'] = df['clean_text'][0:5].apply(tokenize)
-
-# print for verification
-#print(df[['clean_text', 'tokens']].head(5))
-"""
-
-# Everything below is WIP
-
-"""
-textcat = nlp.create_pipe("textcat", config={"exclusive_classes": True})
-
-# Add labels
-textcat.add_label("amazing")
-textcat.add_label("good")
-textcat.add_label("okay")
-textcat.add_label("bad")
-textcat.add_label("terrible")
-
-# Train only textcat
-training_excluded_pipes = [
-    pipe for pipe in nlp.pipe_names if pipe != "textcat"
-]
-with nlp.disable_pipes(training_excluded_pipes):
-    optimizer = nlp.begin_training()
-    # Training loop
-    print("Beginning training")
-    batch_sizes = compounding(
-        4.0, 32.0, 1.001
-    )
-    for i in range(iterations):
-        loss = {}
-        random.shuffle(training_data)
-        batches = minibatch(training_data, size=batch_sizes)
-        for batch in batches:
-            text, labels = zip(*batch)
-            nlp.update(
-                text,
-                labels,
-                drop=0.2,
-                sgd=optimizer,
-                losses=loss
-            )
 """
