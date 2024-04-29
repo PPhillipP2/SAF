@@ -1,4 +1,5 @@
 import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
 import spacy_cleaner
 from spacy_cleaner import processing, Cleaner
 from spacy_cleaner.processing import removers, replacers, mutators
@@ -9,7 +10,7 @@ from spacy.pipeline import TextCategorizer
 from spacy.training import Example
 
 # load dataset file
-df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
+df = pd.read_csv(r'Data/IMDB Dataset.csv')
 
 pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
@@ -18,6 +19,8 @@ pd.set_option('display.max_colwidth', 100)  # Show full width of each column
 # Load the English tokenizer and language model
 activated = spacy.prefer_gpu()
 nlp = spacy.load('en_core_web_trf')
+spacy_text_blob = SpacyTextBlob(nlp)
+nlp.add_pipe('spacytextblob')
 
 
 # Clean up data
@@ -34,19 +37,21 @@ def clean_text(text):
 # Test for tokenization
 #test = "One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked."
 
-review_set = df.iloc[0:5, 0].tolist()
+review_set = df.iloc[:, 0].tolist()
 
 # spacy default pipeline
 print("Default spacy tokens:")
 for review in review_set:
     print(review)
-    doc = nlp(clean_text(review))
-
+    #doc = nlp(clean_text(review))
+    doc = nlp(review)
     # all desired properties from tokens picked here
     print([[token.text, token.pos_] for token in doc if not token.is_stop and not token.is_punct])
-    #print([token.pos_ for token in doc if not token.is_stop and not token.is_punct])
-    print(doc.sentiment)
 
+    #for sentence in doc.sents:
+    #    print(sentence._.blob.sentiment)
+
+    print(doc._.blob.sentiment)
 
     print()
 
