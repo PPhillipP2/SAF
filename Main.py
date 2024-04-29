@@ -7,7 +7,6 @@ import numpy as np
 import re
 
 # load dataset file
-df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
 
 pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
@@ -51,27 +50,35 @@ def perform_sentiment_analysis(filepath):
     kf = KFold(n_splits=5)  # 5-fold cross-validation
     accuracies = []
     f1_scores = []
+    all_predictions = []  # List to store all predictions
 
     # Prepare data
-    sentiments = [analyze_sentiment(review) for review in data['review']]
-    data['predicted_sentiment'] = ['positive' if score > 0 else 'negative' for score in sentiments]
-    labels = data['sentiment'].apply(lambda x: 1 if x == 'positive' else 0).values
-    predicted_labels = data['predicted_sentiment'].apply(lambda x: 1 if x == 'positive' else 0).values
-
-    # Perform k-fold cross-validation
     for train_index, test_index in kf.split(data):
-        y_test = labels[test_index]
-        predictions = predicted_labels[test_index]
+        test_reviews = data.iloc[test_index]['review']
+        y_test = data.iloc[test_index]['sentiment'].apply(lambda x: 1 if x == 'positive' else 0).values
+        test_sentiments = [analyze_sentiment(review) for review in test_reviews]
+        predictions = ['positive' if score > 0 else 'negative' for score in test_sentiments]
+        predicted_labels = [1 if pred == 'positive' else 0 for pred in predictions]
+
+        # Store predictions
+        for review, actual, predicted, rating in zip(test_reviews, y_test, predicted_labels, test_sentiments):
+            all_predictions.append({'Review': review, 'Actual': actual, 'Predicted': predicted, 'Rating': ((rating+1)/2)})
 
         # Calculate metrics
-        acc = accuracy_score(y_test, predictions)
-        f1 = f1_score(y_test, predictions)
+        acc = accuracy_score(y_test, predicted_labels)
+        f1 = f1_score(y_test, predicted_labels)
         accuracies.append(acc)
         f1_scores.append(f1)
 
+
+    # Convert predictions list to DataFrame and save or display
+    predictions_df = pd.DataFrame(all_predictions)
+    predictions_df.to_csv('movie_review_predictions.csv', index=True)
+    print(predictions_df.head(15))  # Optionally print the first few rows
+
     # Print results
-    print(f"Average Accuracy: {np.mean(accuracies):.2f}")
-    print(f"Average F1 Score: {np.mean(f1_scores):.2f}")
+    print(f"Average Model Accuracy: {np.mean(accuracies):.2f}")
+    print(f"Average Model F1 Score: {np.mean(f1_scores):.2f}")
 
 # If this script is the main program being executed
 if __name__ == "__main__":
@@ -81,6 +88,9 @@ if __name__ == "__main__":
 
 
 """
+df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
+
+
 review_set = df.iloc[:, 0].tolist()
 
 # spacy default pipeline
