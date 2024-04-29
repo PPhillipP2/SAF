@@ -13,7 +13,7 @@ pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.max_colwidth', 100)  # Show full width of each column
 
 # Load the English tokenizer and language model
-activated = spacy.prefer_gpu()
+activated = spacy.require_gpu()
 nlp = spacy.load('en_core_web_trf')
 spacy_text_blob = SpacyTextBlob(nlp)
 nlp.add_pipe('spacytextblob')
@@ -89,7 +89,7 @@ def perform_sentiment_analysis(filepath):
 
 # If this script is the main program being executed
 if __name__ == "__main__":
-    perform_sentiment_analysis('Data/IMDB Dataset MINIMIZED.csv')
+    perform_sentiment_analysis('Data/IMDB Dataset - 25000.csv')
 
 
 
