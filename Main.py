@@ -11,46 +11,81 @@ from spacy.training import Example
 # load dataset file
 df = pd.read_csv(r'Data/IMDB Dataset MINIMIZED.csv')
 
+pd.set_option('display.max_rows', None)  # Show all rows
+pd.set_option('display.max_columns', None)  # Show all columns
+pd.set_option('display.max_colwidth', 100)  # Show full width of each column
+
 # Load the English tokenizer and language model
 activated = spacy.prefer_gpu()
 nlp = spacy.load('en_core_web_trf')
 
-# Test for tokenization
-test = ["One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked. Greg's a shitter!"]
-tokens = [token.text for token in nlp(test[0])]
-print(tokens)
 
 # Clean up data
 def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'<br\s*/?>', ' ', text)
+    # remove html line breaks
+    text = re.sub(r'<br\s*/?>', '', text)
+    #remove non-alphanumeric characters
     text = re.sub(r"[^a-zA-Z0-9]", ' ', text)
+    # Remove extra whitespaces
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def tokenize(text):
-    doc = nlp(text)
-    doc = [token.lemma_ for token in doc if not token.is_stop]
-    return doc
 
+# Test for tokenization
+#test = "One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked."
+
+review_set = df.iloc[0:5, 0].tolist()
+
+# spacy default pipeline
+print("Default spacy tokens:")
+for review in review_set:
+    print(review)
+    doc = nlp(clean_text(review))
+
+    # all desired properties from tokens picked here
+    print([[token.text, token.pos_] for token in doc if not token.is_stop and not token.is_punct])
+    #print([token.pos_ for token in doc if not token.is_stop and not token.is_punct])
+    print(doc.sentiment)
+
+
+    print()
+
+
+"""
 pipeline = Cleaner(
     nlp,
-    removers.remove_stopword_token,
-    removers.remove_punctuation_token,
-    mutators.mutate_lemma_token,
+    processing.remove_stopword_token,
+    processing.remove_punctuation_token,
+    processing.mutate_lemma_token,
 )
 
-print(pipeline.clean(test))
+
+test2 = ["One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked."]
+
+# custom spacy_cleaner pipeline
+processed = pipeline.clean(test2)
+print("Custom spacy_cleaner pipeline:")
+print(processed)
+
+
 
 
 # clean and preprocess the text review data column in df
-#df['clean_text'] = df.iloc[:, 0].apply(clean_text)
+reviews = df.iloc[:, 0].tolist()
+
+df['clean_text'] = pipeline.clean(reviews)
+
+
+print("Movie Review Dataframe (custom pipeline:")
+print(df['clean_text'])
+
 
 # tokenize the CLEANED text
-#df['tokens'] = df['clean_text'].apply(tokenize)
+#df['tokens'] = df['clean_text'][0:5].apply(tokenize)
 
 # print for verification
-#print(df[['clean_text', 'tokens']].head())
-
+#print(df[['clean_text', 'tokens']].head(5))
+"""
 
 # Everything below is WIP
 
