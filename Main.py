@@ -84,12 +84,12 @@ def perform_sentiment_analysis(filepath):
     print(predictions_df.head(15))  # Optionally print the first few rows
 
     # Print results
-    print(f"Average Model Accuracy: {np.mean(accuracies):.2f}")
-    print(f"Average Model F1 Score: {np.mean(f1_scores):.2f}")
+    print(f"Average Model Accuracy: {np.mean(accuracies):.4f}")
+    print(f"Average Model F1 Score: {np.mean(f1_scores):.4f}")
 
 # If this script is the main program being executed
 if __name__ == "__main__":
-    perform_sentiment_analysis('Data/IMDB Dataset - 25000.csv')
+    perform_sentiment_analysis('Data/IMDB Dataset - 10000.csv')
 
 
 
