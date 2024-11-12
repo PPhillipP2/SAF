@@ -1,2 +1,2 @@
 # SAF
-Sentiment Analysis for Films
+Sentiment Analysis for Films - spaCy, DistilBERT, IMDB Dataset
